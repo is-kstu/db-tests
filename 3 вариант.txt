@@ -1,0 +1,30 @@
+3 вариант
+
+CREATE TABLE departments(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR (255) NOT NULL,
+    location VARCHAR (255) NOT NULL
+);
+
+CREATE TABLE employees(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR (255) NOT NULL,
+    department_id INT REFERENCES departments(id),
+    position VARCHAR (255) NOT NULL,
+    salary INT NOT NULL
+);
+ 
+SELECT name FROM departments
+UNION
+SELECT name FROM employees;
+
+INSERT INTO departments(id, name, location)
+VALUES ('1', 'Продажи', 'Третий этаж'),
+       ('2', 'IT', 'Пятый этаж'),
+       ('3', 'Маркетинг', 'Первый этаж');   
+
+INSERT INTO employees(id, name, department_id, position, salary)
+VALUES ('1', 'Иванов В.М', '2', 'Программист', '200000'),
+       ('2', 'Силищев А.Н', '1', 'Продавец-консультант', '230000'),
+       ('3', 'Карбушев С.К', '3', 'Маркетолог', '220000');
+
