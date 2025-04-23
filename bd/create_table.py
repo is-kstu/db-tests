@@ -1,40 +1,38 @@
-# 8 вариант
+# 2 вариант
 
 import psycopg2
 
-DB_PARAMS = {
-    "dbname": "bd_test",
-    "user": "davidkozahmetov",
-    "password": "456759254",
-    "host": "localhost",
-    "port": "5432"
-}
-conn = psycopg2.connect(**DB_PARAMS)
-cursor = conn.cursor()
+conn = psycopg2.connect(
+    dbname="bd_test",
+    user="davidkozahmetov",
+    password="456759254",
+    host="localhost",
+    port="5432"
+)
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS students (
+cur = conn.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS rooms (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    group_name VARCHAR(50) NOT NULL
-);
+    room_number VARCHAR(10),
+    type VARCHAR(50),
+    price NUMERIC
+)
 """)
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS grades (
+cur.execute("""
+CREATE TABLE IF NOT EXISTS bookings (
     id SERIAL PRIMARY KEY,
-    student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
-    subject VARCHAR(100) NOT NULL,
-    grade INTEGER CHECK (grade BETWEEN 1 AND 5)
-);
+    room_id INTEGER,
+    guest_name VARCHAR(100),
+    check_in DATE,
+    check_out DATE
+)
 """)
 
-cursor.execute("INSERT INTO students (name, group_name) VALUES ('Иван Иванов', 'Группа 1'), ('Мария Петрова', 'Группа 2') ON CONFLICT DO NOTHING;")
-
-cursor.execute("INSERT INTO grades (student_id, subject, grade) VALUES (1, 'Математика', 4), (1, 'Физика', 5), (2, 'Литература', 3) ON CONFLICT DO NOTHING;")
+cur.execute("INSERT INTO rooms (room_number, type, price) VALUES ('101', 'Обычный', 3000), ('102', 'Двухместный', 5000), ('201', 'Люкс', 10000)")
 
 conn.commit()
-cursor.close()
+cur.close()
 conn.close()
-
-

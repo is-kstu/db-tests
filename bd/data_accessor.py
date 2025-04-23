@@ -1,38 +1,34 @@
-# 8 вариант
+# 2 вариант
 
 import psycopg2
 
-DB_PARAMS = {
-    "dbname": "bd_test",
-    "user": "davidkozahmetov",
-    "password": "456759254",
-    "host": "localhost",
-    "port": "5432"
-}
+class HotelDB:
+    def __init__(self):
+        self.conn = psycopg2.connect(
+            dbname="bd_test",
+            user="davidkozahmetov",
+            password="456759254",
+            host="localhost",
+            port="5432"
+        )
 
-def get_students():
-    conn = psycopg2.connect(**DB_PARAMS)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM students;")
-    students = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return students
+    def get_rooms(self):
+        cur = self.conn.cursor()
+        cur.execute("SELECT id, room_number FROM rooms")
+        result = cur.fetchall()
+        cur.close()
+        return result
 
-def get_grades(student_id):
-    conn = psycopg2.connect(**DB_PARAMS)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, subject, grade FROM grades WHERE student_id = %s;", (student_id,))
-    grades = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return grades
+    def get_bookings_by_room(self, room_id):
+        cur = self.conn.cursor()
+        cur.execute("SELECT guest_name, check_in, check_out FROM bookings WHERE room_id = %s", (room_id,))
+        result = cur.fetchall()
+        cur.close()
+        return result
 
-def add_grade(student_id, subject, grade):
-    conn = psycopg2.connect(**DB_PARAMS)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO grades (student_id, subject, grade) VALUES (%s, %s, %s);", (student_id, subject, grade))
-    conn.commit()
-    cursor.close()
-    conn.close()
-
+    def add_booking(self, room_id, guest_name, check_in, check_out):
+        cur = self.conn.cursor()
+        cur.execute("INSERT INTO bookings (room_id, guest_name, check_in, check_out) VALUES (%s, %s, %s, %s)",
+                    (room_id, guest_name, check_in, check_out))
+        self.conn.commit()
+        cur.close()

@@ -1,65 +1,84 @@
-# 8 вариант
+# 2 вариант
 
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QTableWidget, QTableWidgetItem, QPushButton, QLineEdit
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QListWidget, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem
 import sys
-from data_accessor import get_students, get_grades, add_grade
+from data_accessor import HotelDB
 
-class GradeManager(QWidget):
+class HotelApp(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Бронирование отеля")
 
-        layout = QVBoxLayout()
+        self.db = HotelDB()
 
-        self.student_select = QComboBox()
-        self.LoadStudents()  
-        self.student_select.currentIndexChanged.connect(self.LoadGrade)
-        layout.addWidget(self.student_select)
+        self.layout = QVBoxLayout()
 
-        self.grade_table = QTableWidget()
-        self.grade_table.setColumnCount(3)  
-        self.grade_table.setHorizontalHeaderLabels(["ID", "Предмет", "Оценка"])
-        layout.addWidget(self.grade_table)
+        self.room_list = QListWidget()
+        self.layout.addWidget(self.room_list)
+        self.room_list.itemClicked.connect(self.load_bookings)
 
-        self.subject_input = QLineEdit()
-        self.subject_input.setPlaceholderText("Предмет")
-        layout.addWidget(self.subject_input)
+        self.table = QTableWidget()
+        self.table.setColumnCount(3)
+        self.table.setHorizontalHeaderLabels(["Гость", "Заезд", "Выезд"])
+        self.layout.addWidget(self.table)
 
-        self.grade_input = QLineEdit()
-        self.grade_input.setPlaceholderText("Оценка")
-        layout.addWidget(self.grade_input)
+        self.name_input = QLineEdit()
+        self.name_input.setPlaceholderText("Имя гостя")
+        self.layout.addWidget(self.name_input)
 
-        self.add_button = QPushButton("Добавить оценку")
-        self.add_button.clicked.connect(self.PushGrade)
-        layout.addWidget(self.add_button)
+        self.check_in_input = QLineEdit()
+        self.check_in_input.setPlaceholderText("Дата заезда (год-месяц-день)")
+        self.layout.addWidget(self.check_in_input)
 
-        self.setLayout(layout)
+        self.check_out_input = QLineEdit()
+        self.check_out_input.setPlaceholderText("Дата выезда (год-месяц-день)")
+        self.layout.addWidget(self.check_out_input)
 
-    def LoadStudents(self):
-        self.student_select.clear()  
-        students = get_students()  
-        for student in students:
-            self.student_select.addItem(student[1], student[0])  
+        self.book_button = QPushButton("Забронировать")
+        self.book_button.clicked.connect(self.book_room)
+        self.layout.addWidget(self.book_button)
 
-    def LoadGrade(self):
-        student_id = self.student_select.currentData()  
-        self.grade_table.setRowCount(0)  
-        grades = get_grades(student_id)  
-        for grade in grades:
-            row = self.grade_table.rowCount()  
-            self.grade_table.insertRow(row)  
-            self.grade_table.setItem(row, 0, QTableWidgetItem(str(grade[0])))  
-            self.grade_table.setItem(row, 1, QTableWidgetItem(grade[1]))  
-            self.grade_table.setItem(row, 2, QTableWidgetItem(str(grade[2])))  
+        self.setLayout(self.layout)
 
-    def PushGrade(self):
-        student_id = self.student_select.currentData()  
-        subject = self.subject_input.text()  
-        grade = self.grade_input.text()  
-        add_grade(student_id, subject, int(grade))  
-        self.LoadGrade()  
+        self.rooms = []
+        self.load_rooms()
+
+    def load_rooms(self):
+        self.rooms = self.db.get_rooms()
+        self.room_list.clear()
+        for room in self.rooms:
+            self.room_list.addItem(f"Номер {room[1]}")
+
+    def get_selected_room_id(self):
+        index = self.room_list.currentRow()
+        if index >= 0:
+            return self.rooms[index][0]
+        return None
+
+    def load_bookings(self):
+        room_id = self.get_selected_room_id()
+        if not room_id:
+            return
+
+        bookings = self.db.get_bookings_by_room(room_id)
+        self.table.setRowCount(0)
+        for booking in bookings:
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+            for col, value in enumerate(booking):
+                self.table.setItem(row, col, QTableWidgetItem(str(value)))
+
+    def book_room(self):
+        room_id = self.get_selected_room_id()
+        name = self.name_input.text()
+        check_in = self.check_in_input.text()
+        check_out = self.check_out_input.text()
+        if room_id and name and check_in and check_out:
+            self.db.add_booking(room_id, name, check_in, check_out)
+            self.load_bookings()
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)  
-    window = GradeManager()  
-    window.show()  
-    sys.exit(app.exec())  
+    app = QApplication(sys.argv)
+    window = HotelApp()
+    window.show()
+    sys.exit(app.exec())
