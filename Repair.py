@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QMessageBox, QInputDialog, QLabel
 )
 
+# для пуша тест
 class RepairApp(QWidget):
     def __init__(self):
         super().__init__()
