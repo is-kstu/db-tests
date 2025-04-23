@@ -1,6 +1,8 @@
 import sys
 import psycopg2
-from PyQt6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtWidgets import ( QApplication, QWidget,QVBoxLayout, QHBoxLayout,
+                              QListWidget, QTableWidget, QTableWidgetItem,
+                                QPushButton, QMessageBox, QInputDialog)
 
 def connect_to_db():
     try:
