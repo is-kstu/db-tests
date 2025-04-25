@@ -21,10 +21,10 @@ class DataAccessor:
         self.cursor.execute(query, (screen_id,))
         self.conn.commit()
 
-def get_screen(self, movie_id):
-    query = "SELECT id, movie_id, date_time, hall FROM screenings WHERE movie_id = %s"
-    self.cursor.execute(query, (movie_id,))
-    return self.cursor.fetchall()
+    def get_screen(self, movie_id):
+        query ="SELECT s.id, m.title AS movie_name, s.date_time, s.hall_number FROM screenings s JOIN movies m ON s.movie_id = m.id WHERE s.movie_id = %s "
+        self.cursor.execute(query, (movie_id,))
+        return self.cursor.fetchall()
 
 
     def __del__(self):
